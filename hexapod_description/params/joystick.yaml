@@ -1,0 +1,26 @@
+hexapod_teleop_joystick:
+  ros__parameters:
+    # Nút "start"
+    STANDUP_BUTTON: 3
+
+    # Nút "select"
+    SITDOWN_BUTTON: 0
+
+    # Nút "L2"
+    BODY_ROTATION_BUTTON: 8
+
+    # Joystick bên trái lên/xuống
+    FORWARD_BACKWARD_AXES: 1
+
+    # Joystick bên trái phải/trái
+    LEFT_RIGHT_AXES: 0
+
+    # Joystick bên phải phải/trái
+    YAW_ROTATION_AXES: 2
+
+    # Joystick bên phải lên/xuống
+    PITCH_ROTATION_AXES: 3
+
+    NON_TELEOP: false
+    MAX_METERS_PER_SEC: 0.0723589
+    MAX_RADIANS_PER_SEC: !degrees 16.629
