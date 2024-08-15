@@ -10,7 +10,6 @@ HexapodTeleopJoystick::HexapodTeleopJoystick() : rclcpp::Node("hexapod_teleop_jo
     state_.data=false;
     imu_override_.data=false;
     NON_TELEOP = false;
-
     this->get_parameter_or("STANDUP_BUTTON", STANDUP_BUTTON, 3);
     this->get_parameter_or("SITDOWN_BUTTON", SITDOWN_BUTTON, 0);
     this->get_parameter_or("BODY_ROTATION_BUTTON", BODY_ROTATION_BUTTON, 8);
