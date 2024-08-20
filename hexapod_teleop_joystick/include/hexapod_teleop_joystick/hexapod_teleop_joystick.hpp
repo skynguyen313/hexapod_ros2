@@ -27,7 +27,7 @@ public:
     bool NON_TELEOP; // Shuts down cmd_vel broadcast
 
 private:
-    void joyCallback(const sensor_msgs::msg::Joy::SharedPtr msg);
+    void joyCallback(const sensor_msgs::msg::Joy::SharedPtr joy);
     void timerCallback();
     rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub_;
     rclcpp::TimerBase::SharedPtr timer_;

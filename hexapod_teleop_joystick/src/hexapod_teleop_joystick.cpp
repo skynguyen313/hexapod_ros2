@@ -10,16 +10,35 @@ HexapodTeleopJoystick::HexapodTeleopJoystick() : rclcpp::Node("hexapod_teleop_jo
     state_.data=false;
     imu_override_.data=false;
     NON_TELEOP = false;
-    this->get_parameter_or("STANDUP_BUTTON", STANDUP_BUTTON, 3);
-    this->get_parameter_or("SITDOWN_BUTTON", SITDOWN_BUTTON, 0);
-    this->get_parameter_or("BODY_ROTATION_BUTTON", BODY_ROTATION_BUTTON, 8);
-    this->get_parameter_or("FORWARD_BACKWARD_AXES", FORWARD_BACKWARD_AXES, 1);
-    this->get_parameter_or("LEFT_RIGHT_AXES", LEFT_RIGHT_AXES, 0);
-    this->get_parameter_or("YAW_ROTATION_AXES", YAW_ROTATION_AXES, 2);
-    this->get_parameter_or("PITCH_ROTATION_AXES", PITCH_ROTATION_AXES, 3);
-    this->get_parameter_or("MAX_METERS_PER_SEC", MAX_METERS_PER_SEC, 0.0);
-    this->get_parameter_or("MAX_RADIANS_PER_SEC", MAX_RADIANS_PER_SEC, 0.0);
-    this->get_parameter_or("NON_TELEOP", NON_TELEOP, false);
+
+    this->declare_parameter("STANDUP_BUTTON",0);
+    STANDUP_BUTTON=this->get_parameter("STANDUP_BUTTON").as_int();
+    this->declare_parameter("SITDOWN_BUTTON",0);
+    SITDOWN_BUTTON=this->get_parameter("SITDOWN_BUTTON").as_int();
+
+    this->declare_parameter("BODY_ROTATION_BUTTON",0);
+    BODY_ROTATION_BUTTON=this->get_parameter("BODY_ROTATION_BUTTON").as_int();
+
+    this->declare_parameter("FORWARD_BACKWARD_AXES",0);
+    FORWARD_BACKWARD_AXES=this->get_parameter("FORWARD_BACKWARD_AXES").as_int();
+
+    this->declare_parameter("LEFT_RIGHT_AXES",0);
+    LEFT_RIGHT_AXES=this->get_parameter("LEFT_RIGHT_AXES").as_int();
+
+    this->declare_parameter("YAW_ROTATION_AXES",0);
+    YAW_ROTATION_AXES=this->get_parameter("YAW_ROTATION_AXES").as_int();
+
+    this->declare_parameter("PITCH_ROTATION_AXES",0);
+    PITCH_ROTATION_AXES=this->get_parameter("PITCH_ROTATION_AXES").as_int();
+
+    this->declare_parameter("MAX_METERS_PER_SEC",0.0);
+    MAX_METERS_PER_SEC=this->get_parameter("MAX_METERS_PER_SEC").as_double();
+
+    this->declare_parameter("MAX_RADIANS_PER_SEC",0.0);
+    MAX_RADIANS_PER_SEC=this->get_parameter("MAX_RADIANS_PER_SEC").as_double();
+
+    this->declare_parameter("NON_TELEOP",false);
+    NON_TELEOP=this->get_parameter("NON_TELEOP").as_bool();
 
     // Initialize publishers
     state_pub_=this->create_publisher<std_msgs::msg::Bool>("/state",100);
@@ -97,7 +116,8 @@ void HexapodTeleopJoystick::timerCallback()
         head_scalar_pub_->publish(head_scalar_);
     }
     state_pub_->publish(state_);
-    imu_override_pub_->publish(imu_override_); 
+    imu_override_pub_->publish(imu_override_);
+
 }
 
 int main(int argc, char **argv)
