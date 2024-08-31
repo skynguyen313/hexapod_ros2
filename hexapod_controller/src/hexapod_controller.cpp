@@ -1,12 +1,12 @@
-#include <cstdio>
-#include "rclcpp/rclcpp.hpp"
+#include <memory>
 #include "hexapod_controller/ik.hpp"
-#include "hexapod_controller/gait.hpp"
+#include "rclcpp/rclcpp.hpp"
 int main(int argc, char ** argv)
 {
-  (void) argc;
-  (void) argv;
-
-  printf("hello world hexapod_controller package\n");
+  rclcpp::init(argc, argv);
+  rclcpp::executors::SingleThreadedExecutor exec;
+  rclcpp::NodeOptions options;
+  
+  rclcpp::shutdown();
   return 0;
 }

@@ -4,63 +4,58 @@
 // Constructor
 //==============================================================================
 
-HexapodTeleopJoystick::HexapodTeleopJoystick() : rclcpp::Node("hexapod_teleop_joystick")
+HexapodTeleopJoystick::HexapodTeleopJoystick()
+: rclcpp::Node( "hexapod_teleop_joystick" )
 {
+    
+    // Declare parameter in node
+    this->declare_parameter( "STANDUP_BUTTON",0 );
+    this->declare_parameter( "SITDOWN_BUTTON",0 );
+    this->declare_parameter( "BODY_ROTATION_BUTTON",0 );
+    this->declare_parameter( "FORWARD_BACKWARD_AXES",0 );
+    this->declare_parameter( "LEFT_RIGHT_AXES",0 );
+    this->declare_parameter( "YAW_ROTATION_AXES",0 );
+    this->declare_parameter( "PITCH_ROTATION_AXES",0 );
+    this->declare_parameter( "MAX_METERS_PER_SEC",0.0 );
+    this->declare_parameter( "MAX_RADIANS_PER_SEC",0.0 );
+    this->declare_parameter( "NON_TELEOP",false );
+
     // Initialize variables
-    state_.data=false;
-    imu_override_.data=false;
+    state_.data = false;
+    imu_override_.data = false;
     NON_TELEOP = false;
-
-    this->declare_parameter("STANDUP_BUTTON",0);
-    STANDUP_BUTTON=this->get_parameter("STANDUP_BUTTON").as_int();
-    this->declare_parameter("SITDOWN_BUTTON",0);
-    SITDOWN_BUTTON=this->get_parameter("SITDOWN_BUTTON").as_int();
-
-    this->declare_parameter("BODY_ROTATION_BUTTON",0);
-    BODY_ROTATION_BUTTON=this->get_parameter("BODY_ROTATION_BUTTON").as_int();
-
-    this->declare_parameter("FORWARD_BACKWARD_AXES",0);
-    FORWARD_BACKWARD_AXES=this->get_parameter("FORWARD_BACKWARD_AXES").as_int();
-
-    this->declare_parameter("LEFT_RIGHT_AXES",0);
-    LEFT_RIGHT_AXES=this->get_parameter("LEFT_RIGHT_AXES").as_int();
-
-    this->declare_parameter("YAW_ROTATION_AXES",0);
-    YAW_ROTATION_AXES=this->get_parameter("YAW_ROTATION_AXES").as_int();
-
-    this->declare_parameter("PITCH_ROTATION_AXES",0);
-    PITCH_ROTATION_AXES=this->get_parameter("PITCH_ROTATION_AXES").as_int();
-
-    this->declare_parameter("MAX_METERS_PER_SEC",0.0);
-    MAX_METERS_PER_SEC=this->get_parameter("MAX_METERS_PER_SEC").as_double();
-
-    this->declare_parameter("MAX_RADIANS_PER_SEC",0.0);
-    MAX_RADIANS_PER_SEC=this->get_parameter("MAX_RADIANS_PER_SEC").as_double();
-
-    this->declare_parameter("NON_TELEOP",false);
-    NON_TELEOP=this->get_parameter("NON_TELEOP").as_bool();
+    STANDUP_BUTTON = this->get_parameter( "STANDUP_BUTTON" ).as_int();
+    SITDOWN_BUTTON = this->get_parameter( "SITDOWN_BUTTON" ).as_int();
+    BODY_ROTATION_BUTTON = this->get_parameter( "BODY_ROTATION_BUTTON" ).as_int();
+    FORWARD_BACKWARD_AXES = this->get_parameter( "FORWARD_BACKWARD_AXES" ).as_int();
+    LEFT_RIGHT_AXES = this->get_parameter( "LEFT_RIGHT_AXES" ).as_int();
+    YAW_ROTATION_AXES = this->get_parameter( "YAW_ROTATION_AXES" ).as_int();
+    PITCH_ROTATION_AXES = this->get_parameter( "PITCH_ROTATION_AXES" ).as_int();
+    MAX_METERS_PER_SEC = this->get_parameter( "MAX_METERS_PER_SEC" ).as_double();
+    MAX_RADIANS_PER_SEC = this->get_parameter( "MAX_RADIANS_PER_SEC" ).as_double();
+    NON_TELEOP = this->get_parameter( "NON_TELEOP" ).as_bool();
 
     // Initialize publishers
-    state_pub_=this->create_publisher<std_msgs::msg::Bool>("/state",100);
-    imu_override_pub_=this->create_publisher<std_msgs::msg::Bool>("/imu/imu_override",100);
-    body_scalar_pub_=this->create_publisher<geometry_msgs::msg::AccelStamped>("/body_scalar",100);
-    head_scalar_pub_=this->create_publisher<geometry_msgs::msg::AccelStamped>("/head_scalar",100);
-    cmd_vel_pub_=this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel",100);
+    state_pub_ = this->create_publisher<std_msgs::msg::Bool>( "/state",100 );
+    imu_override_pub_ = this->create_publisher<std_msgs::msg::Bool>( "/imu/imu_override",100 );
+    body_scalar_pub_ = this->create_publisher<geometry_msgs::msg::AccelStamped>( "/body_scalar",100 );
+    head_scalar_pub_ = this->create_publisher<geometry_msgs::msg::AccelStamped>( "/head_scalar",100 );
+    cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::Twist>( "cmd_vel",100 );
+    timer_ = this->create_wall_timer(
+        std::chrono::milliseconds(10),std::bind(&HexapodTeleopJoystick::timerCallback,this));
 
     // Initialize subsribers
     joy_sub_ = this->create_subscription<sensor_msgs::msg::Joy>(
         "/joy", 5, std::bind(&HexapodTeleopJoystick::joyCallback, this, std::placeholders::_1));
 
-    // Timer Callback
-    timer_ = this->create_wall_timer(
-        std::chrono::milliseconds(10),std::bind(&HexapodTeleopJoystick::timerCallback,this));
+    
 }
 
 //==============================================================================
 // Joystick call reading joystick topics
 //==============================================================================
 
-void HexapodTeleopJoystick::joyCallback(const sensor_msgs::msg::Joy::SharedPtr joy)
+void HexapodTeleopJoystick::joyCallback( const sensor_msgs::msg::Joy::SharedPtr joy )
 {
     auto current_time = this->now();
     
@@ -106,6 +101,10 @@ void HexapodTeleopJoystick::joyCallback(const sensor_msgs::msg::Joy::SharedPtr j
         cmd_vel_.angular.z = joy->axes[YAW_ROTATION_AXES] * MAX_RADIANS_PER_SEC;
     }
 }
+
+//==============================================================================
+// Joystick publish topics
+//==============================================================================
 
 void HexapodTeleopJoystick::timerCallback()
 {

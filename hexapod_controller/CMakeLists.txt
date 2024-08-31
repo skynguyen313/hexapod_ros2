@@ -8,24 +8,36 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_components REQUIRED)
 find_package(hexapod_msgs REQUIRED)
 
-# include directories
-include_directories(include ${hexapod_msgs_INCLUDE_DIRS})
+include_directories(include)
+add_library(hexapod_controller_composition SHARED
+            src/ik.cpp
+            )
+target_compile_definitions(hexapod_controller_composition
+  PRIVATE "HEXAPOD_CONTROLLER_DLL")
+ament_target_dependencies(hexapod_controller_composition rclcpp rclcpp_components hexapod_msgs)
+
+# This package installs libraries without exporting them.
+# Export the library path to ensure that the installed libraries are available.
+if(NOT WIN32)
+  ament_environment_hooks(
+    "${ament_cmake_package_templates_ENVIRONMENT_HOOK_LIBRARY_PATH}")
+endif()
 
 add_executable(hexapod_controller src/hexapod_controller.cpp)
-ament_target_dependencies(hexapod_controller rclcpp hexapod_msgs)
+target_link_libraries(hexapod_controller hexapod_controller_composition)
+ament_target_dependencies(hexapod_controller rclcpp class_loader)
 
+install(TARGETS
+hexapod_controller_composition
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin)
 
-# add libraries
-add_library(ik SHARED src/ik.cpp)
-add_library(gait SHARED src/gait.cpp)
-
-target_link_libraries(hexapod_controller ik gait)
-
-install(TARGETS 
+install(TARGETS
   hexapod_controller
   DESTINATION lib/${PROJECT_NAME})
-
 
 ament_package()
