@@ -1,10 +1,10 @@
 #include "hexapod_controller/ik.hpp"
 
 
-
-Ik::Ik( const rclcpp::NodeOptions &options )
-: rclcpp::Node ("ik",options)
+IK::IK( const rclcpp::NodeOptions &options )
+:rclcpp::Node ("ik",options)
 {
+    
     // Declare parameter in node
     this->declare_parameter( "COXA_TO_CENTER_X", std::vector<double>{} );
     this->declare_parameter( "COXA_TO_CENTER_Y", std::vector<double>{} );
@@ -30,15 +30,13 @@ Ik::Ik( const rclcpp::NodeOptions &options )
     TIBIA_LENGTH = this->get_parameter( "TIBIA_LENGTH" ).as_double();
     TARSUS_LENGTH = this->get_parameter( "TARSUS_LENGTH" ).as_double();
     NUMBER_OF_LEGS = this->get_parameter( "NUMBER_OF_LEGS" ).as_int();
-    
-
 }
 
 //=============================================================================
 // getSinCos:  Get the sinus and cosinus from the angle
 //=============================================================================
 
-Trig Ik::getSinCos( double angle_rad )
+Trig IK::getSinCos( double angle_rad )
 {
     Trig body_trig;
 
@@ -52,7 +50,7 @@ Trig Ik::getSinCos( double angle_rad )
 // Inverse Kinematics
 //=============================================================================
 
-void Ik::calculateIK( const hexapod_msgs::msg::FeetPositions::SharedPtr feet, const hexapod_msgs::msg::Pose::SharedPtr body,const hexapod_msgs::msg::LegsJoints::SharedPtr legs )
+void IK::calculateIK( const hexapod_msgs::msg::FeetPositions &feet, const hexapod_msgs::msg::Pose3D &body, hexapod_msgs::msg::LegsJoints *legs )
 {
     double sign = -1.0;
     for( int leg_index = 0; leg_index < NUMBER_OF_LEGS; leg_index++ )
@@ -67,16 +65,16 @@ void Ik::calculateIK( const hexapod_msgs::msg::FeetPositions::SharedPtr feet, co
         }
 
         // First calculate sinus and co-sinus for each angular axis
-        Trig A = getSinCos( body->orientation.yaw + feet->foot[leg_index].orientation.yaw );
-        Trig B = getSinCos( body->orientation.pitch );
-        Trig G = getSinCos( body->orientation.roll );
+        Trig A = getSinCos( body.orientation.yaw + feet.foot[leg_index].orientation.yaw );
+        Trig B = getSinCos( body.orientation.pitch );
+        Trig G = getSinCos( body.orientation.roll );
 
         // Calculating totals from the feet to center of the body
-        double cpr_x = feet->foot[leg_index].position.x + body->position.x - INIT_FOOT_POS_X[leg_index] - COXA_TO_CENTER_X[leg_index];
+        double cpr_x = feet.foot[leg_index].position.x + body.position.x - INIT_FOOT_POS_X[leg_index] - COXA_TO_CENTER_X[leg_index];
 
-        double cpr_y = feet->foot[leg_index].position.y + sign*( body->position.y + INIT_FOOT_POS_Y[leg_index] + COXA_TO_CENTER_Y[leg_index] );
+        double cpr_y = feet.foot[leg_index].position.y + sign*( body.position.y + INIT_FOOT_POS_Y[leg_index] + COXA_TO_CENTER_Y[leg_index] );
 
-        double cpr_z = feet->foot[leg_index].position.z + body->position.z + TARSUS_LENGTH - INIT_FOOT_POS_Z[leg_index];
+        double cpr_z = feet.foot[leg_index].position.z + body.position.z + TARSUS_LENGTH - INIT_FOOT_POS_Z[leg_index];
 
 
         // Calculation of angular matrix of body (Tait-Bryan angles Z, Y, X)
@@ -94,13 +92,14 @@ void Ik::calculateIK( const hexapod_msgs::msg::FeetPositions::SharedPtr feet, co
         double body_pos_z = cpr_z - ( ( -cpr_x * B.sine ) + ( cpr_y * B.cosine * G.sine ) + ( cpr_z * B.cosine * G.cosine ) );
 
         // Calculate foot position
-        double feet_pos_x = -INIT_FOOT_POS_X[leg_index] + body->position.x - body_pos_x + feet->foot[leg_index].position.x;
-        double feet_pos_y =  INIT_FOOT_POS_Y[leg_index] + sign*( body->position.y - body_pos_y + feet->foot[leg_index].position.y );
-        double feet_pos_z =  INIT_FOOT_POS_Z[leg_index] - TARSUS_LENGTH + body->position.z - body_pos_z - feet->foot[leg_index].position.z;
+        double feet_pos_x = -INIT_FOOT_POS_X[leg_index] + body.position.x - body_pos_x + feet.foot[leg_index].position.x;
+        double feet_pos_y =  INIT_FOOT_POS_Y[leg_index] + sign*( body.position.y - body_pos_y + feet.foot[leg_index].position.y );
+        double feet_pos_z =  INIT_FOOT_POS_Z[leg_index] - TARSUS_LENGTH + body.position.z - body_pos_z - feet.foot[leg_index].position.z;
 
         // Length between the Root and Foot Position ...Pythagorean theorem
         double femur_to_tarsus = sqrt( pow( feet_pos_x, 2 ) + pow( feet_pos_y, 2 ) ) - COXA_LENGTH;
 
+        
         if( std::abs( femur_to_tarsus ) > ( FEMUR_LENGTH + TIBIA_LENGTH ) )
         {
             RCLCPP_FATAL(this->get_logger(), "IK Solver cannot solve a foot position that is not within leg reach!!!");
@@ -135,4 +134,4 @@ void Ik::calculateIK( const hexapod_msgs::msg::FeetPositions::SharedPtr feet, co
 }
 
 #include "rclcpp_components/register_node_macro.hpp"
-RCLCPP_COMPONENTS_REGISTER_NODE(Ik)
+RCLCPP_COMPONENTS_REGISTER_NODE(IK)

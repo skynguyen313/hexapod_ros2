@@ -9,15 +9,19 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(hexapod_msgs REQUIRED)
 
 include_directories(include)
 add_library(hexapod_controller_composition SHARED
+            src/control.cpp
+            src/gait.cpp
             src/ik.cpp
+            src/servo_driver.cpp
             )
 target_compile_definitions(hexapod_controller_composition
   PRIVATE "HEXAPOD_CONTROLLER_DLL")
-ament_target_dependencies(hexapod_controller_composition rclcpp rclcpp_components hexapod_msgs)
+ament_target_dependencies(hexapod_controller_composition rclcpp rclcpp_components geometry_msgs hexapod_msgs)
 
 # This package installs libraries without exporting them.
 # Export the library path to ensure that the installed libraries are available.

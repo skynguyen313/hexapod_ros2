@@ -5,9 +5,8 @@
 //==============================================================================
 
 HexapodTeleopJoystick::HexapodTeleopJoystick()
-: rclcpp::Node( "hexapod_teleop_joystick" )
-{
-    
+:rclcpp::Node( "hexapod_teleop_joystick" )
+{ 
     // Declare parameter in node
     this->declare_parameter( "STANDUP_BUTTON",0 );
     this->declare_parameter( "SITDOWN_BUTTON",0 );
@@ -47,8 +46,7 @@ HexapodTeleopJoystick::HexapodTeleopJoystick()
     // Initialize subsribers
     joy_sub_ = this->create_subscription<sensor_msgs::msg::Joy>(
         "/joy", 5, std::bind(&HexapodTeleopJoystick::joyCallback, this, std::placeholders::_1));
-
-    
+  
 }
 
 //==============================================================================

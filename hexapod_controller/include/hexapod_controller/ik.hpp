@@ -3,13 +3,13 @@
 
 #include <cmath>
 #include "rclcpp/rclcpp.hpp"
-#include "hexapod_msgs/msg/pose.hpp"
+#include "hexapod_msgs/msg/pose3_d.hpp"
 #include "hexapod_msgs/msg/feet_positions.hpp"
 #include "hexapod_msgs/msg/legs_joints.hpp"
 #include "hexapod_controller/visibility.h"
 
 //=============================================================================
-// Define structs and classes for gait system
+// Define structs and classes for ik system
 //=============================================================================
 
 static const double PI = atan(1.0)*4.0;
@@ -20,11 +20,11 @@ struct Trig
     double cosine;
 };
 
-class Ik : public rclcpp::Node
+class IK : public rclcpp::Node
 {
 public:
-    HEXAPOD_CONTROLLER_PUBLIC Ik(const rclcpp::NodeOptions &options );
-    void calculateIK(const hexapod_msgs::msg::FeetPositions::SharedPtr feet, const hexapod_msgs::msg::Pose::SharedPtr body,const hexapod_msgs::msg::LegsJoints::SharedPtr legs);
+    HEXAPOD_CONTROLLER_PUBLIC IK( const rclcpp::NodeOptions &options );  
+    void calculateIK(const hexapod_msgs::msg::FeetPositions &feet, const hexapod_msgs::msg::Pose3D &body, hexapod_msgs::msg::LegsJoints *legs);
 private:
     Trig getSinCos( double angle_rad );
     std::vector<double> COXA_TO_CENTER_X, COXA_TO_CENTER_Y; // Distance from coxa joint to the center pivot

@@ -14,7 +14,8 @@ set(msg_files
   "msg/FeetPositions.msg"
   "msg/LegJoints.msg"
   "msg/LegsJoints.msg"
-  "msg/Pose.msg"
+  "msg/Pose2D.msg"
+  "msg/Pose3D.msg"
   "msg/RPY.msg"
 )
 
